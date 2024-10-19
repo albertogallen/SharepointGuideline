@@ -27,7 +27,17 @@ page 50000 "Sharepoint Connector Setup"
                 {
                     ApplicationArea = All;
                 }
+                field("Document Library"; Rec."Document Library")
+                {
+                    ApplicationArea = All;
+                }
             }
         }
     }
+    trigger OnOpenPage()
+    begin
+        if not Rec.Get() then
+            Rec.Insert();
+
+    end;
 }

@@ -52,10 +52,15 @@ codeunit 50000 "Sharepoint Management"
     procedure GetDocumentsRootFiles(var SharepointFolder: Record "SharePoint Folder" temporary; var SharepointFile: Record "SharePoint File"): Text
     var
         SharePointList: Record "SharePoint List" temporary;
+        SharepointSetup: Record "Sharepoint Connector Setup";
     begin
         InitializeConnection(); //Initialize a connection if not connected
+
+        SharepointSetup.Get(); //Get Sharepoint Setup data
+
         if SharePointClient.GetLists(SharePointList) then begin //Sharepoint List is empty, GetLists writes data
-            SharePointList.SetRange(Title, 'Documents'); //We filter out the Documents list to access the documents library
+            //SharePointList.SetRange(Title, 'Documentos'); //We filter out the Documents list to access the documents library
+            SharePointList.SetRange(Title, SharepointSetup."Document Library"); //We filter out the Documents list to access the documents library
             if SharePointList.FindFirst() then begin
                 //Use GetDocumentLibraryRootFolder to get the root folder's server relative URL
                 if SharePointClient.GetDocumentLibraryRootFolder(SharePointList.OdataId, SharePointFolder) then begin
@@ -95,6 +100,7 @@ codeunit 50000 "Sharepoint Management"
         SharepointSetup.Get(); //Get Sharepoint Setup data
 
         AadTenantId := GetAadTenantNameFromBaseUrl(SharepointSetup."Sharepoint URL"); //Used to get an Azure Active Directory ID from a URL
+
         SharePointClient.Initialize(SharepointSetup."Sharepoint URL", GetSharePointAuthorization(AadTenantId)); //Initializes the client
 
         SharePointClient.GetLists(SharePointList); //We need to perform at least one action to get diagnostics data
@@ -112,12 +118,16 @@ codeunit 50000 "Sharepoint Management"
         SharepointSetup: Record "Sharepoint Connector Setup";
         SharePointAuth: Codeunit "SharePoint Auth.";
         Scopes: List of [Text];
+        SiteSecretText: SecretText;
     begin
         SharepointSetup.Get(); //Get Sharepoint Setup data. Optionally, this can be made into a global variable as well.
 
         Scopes.Add('00000003-0000-0ff1-ce00-000000000000/.default'); //Using a default scope provided as an example
         //We return an authorization code that will be used to initialize the Sharepoint Client
-        exit(SharePointAuth.CreateAuthorizationCode(AadTenantId, SharepointSetup."Client ID", SharepointSetup."Client Secret", Scopes));
+        //exit(SharePointAuth.CreateAuthorizationCode(AadTenantId, SharepointSetup."Client ID", SharepointSetup."Client Secret", Scopes));         
+        SiteSecretText := SecretText.SecretStrSubstNo('%1', SharepointSetup."Client Secret");
+        exit(SharePointAuth.CreateAuthorizationCode(AadTenantId, SharepointSetup."Client ID", SiteSecretText, Scopes));
+
     end;
 
     local procedure GetAadTenantNameFromBaseUrl(BaseUrl: Text): Text

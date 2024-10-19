@@ -19,7 +19,7 @@ page 50004 "Sharepoint File List"
                 {
                     ApplicationArea = All;
                 }
-                field(Name; Rec.Title)
+                field(Title; Rec.Title)
                 {
                     ApplicationArea = All;
 
@@ -33,6 +33,10 @@ page 50004 "Sharepoint File List"
                             FileList.RunModal();
                         end;
                     end;
+                }
+                field(Description; Rec.Description)
+                {
+                    ApplicationArea = All;
                 }
                 field(OdataId; Rec.OdataId)
                 {

@@ -20,6 +20,11 @@ table 50000 "Sharepoint Connector Setup"
         {
             DataClassification = ToBeClassified;
         }
+        field(5; "Document Library"; Text[50])
+        {
+            DataClassification = ToBeClassified;
+        }
+
 
     }
 
